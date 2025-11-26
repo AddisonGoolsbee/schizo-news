@@ -9,12 +9,14 @@ from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock
 import io
-from PIL import Image, ImageOps
+from PIL import Image
 
 from xai_sdk import Client
 from xai_sdk.chat import user, system
 
 NUM_ARTICLES = 2
+# Maximum characters of article text to send to the model (helps limit token usage)
+MAX_ARTICLE_CHARS = 4000
 RSS_BBC_US = "https://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml"
 
 # Load environment variables from .env file in the backend directory
@@ -213,7 +215,8 @@ def convert_to_emojipasta(article_text, original_title):
         timeout=3600,
     )
 
-    max_retries = 10
+    # Keep retries small to avoid repeated large requests
+    max_retries = 3
 
     for attempt in range(max_retries):
         try:
@@ -257,9 +260,20 @@ def convert_to_emojipasta(article_text, original_title):
                     f"Previous attempts failed. This is attempt {attempt + 1}. Make sure to output ONLY valid JSON."
                 )
 
+            # Truncate very long articles to keep token usage bounded
+            if len(article_text) > MAX_ARTICLE_CHARS:
+                # Try to cut on a paragraph boundary for readability
+                truncated = article_text[:MAX_ARTICLE_CHARS]
+                last_break = truncated.rfind("\n\n")
+                if last_break > 0:
+                    truncated = truncated[:last_break]
+                article_for_model = truncated + "\n\n[TRUNCATED]"
+            else:
+                article_for_model = article_text
+
             chat.append(
                 user(
-                    f"Convert this news article to emojipasta format by extracting relevant facts from it and using those facts to come up with an emojipasta article that has lots and lots of emojis and slang. Use as much slang as you can for references to popular people and culture especially. Include as many puns as possible, lots of jokes and puns. Create an emojipasta headline and full emojipasta text. Article content:\n{article_text}\n\nOutput only valid JSON with 'headline' and 'text' fields. {retry_instruction}"
+                    f"Convert this news article to emojipasta format by extracting relevant facts from it and using those facts to come up with an emojipasta article that has lots and lots of emojis and slang. Use as much slang as you can for references to popular people and culture especially. Include as many puns as possible, lots of jokes and puns. Create an emojipasta headline and full emojipasta text. Article content:\n{article_for_model}\n\nOutput only valid JSON with 'headline' and 'text' fields. {retry_instruction}"
                 )
             )
 
