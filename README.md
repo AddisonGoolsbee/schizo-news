@@ -1,3 +1,5 @@
+*This is a mirror. See upstream: https://github.com/kakduman/emoji-news*
+
 # Schizo News
 
 ## Frontend
