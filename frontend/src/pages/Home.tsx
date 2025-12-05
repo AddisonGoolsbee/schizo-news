@@ -11,7 +11,7 @@ export default function Home({ news, error }: { news: NewsItem[]; error: string 
   return (
     <>
       {error ? (
-        <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{error}</p>
+        <p className="pt-4 text-lg font-serif px-4">{error}</p>
       ) : news.length === 0 ? (
         <></>
       ) : (
@@ -28,7 +28,7 @@ export default function Home({ news, error }: { news: NewsItem[]; error: string 
                   <h2 className="text-xl font-bold leading-snug md:text-3xl">{item.headline}</h2>
                   <p className="mt-2 text-sm leading-relaxed md:mt-3">{truncate(item.text, previewLimit)}</p>
                   <div className="flex flex-row justify-between mt-2 ">
-                    <p className="text-xs">{formatDate(item.date)}</p>
+                    <p className="text-sm text-neutral-500">{formatDate(item.date)}</p>
                     <p className="text-xs underline-offset-2 underline font-semibold text-neutral-700">READ MORE</p>
                   </div>
                 </article>

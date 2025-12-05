@@ -38,7 +38,7 @@ export default function About() {
       </p>
       <p className="mt-4 text-base text-neutral-500">
         <Link to="/" className="font-semibold underline">
-          Head back home
+          Go back to news feed
         </Link>
       </p>
     </main>
